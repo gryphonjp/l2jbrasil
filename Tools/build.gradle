@@ -1,0 +1,56 @@
+plugins {
+    id "java"
+    id "idea"
+    id "eclipse"
+}
+
+version '1.3.0'
+
+ext.moduleName = 'com.l2jbr.tools'
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/com.l2jbr.tools']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+}
+
+
+dependencies {
+    compile project(':Commons')
+    compile project(":Loginserver")
+    compile project(":Gameserver")
+
+    runtime project(':Mmocore')
+
+    runtime 'com.mchange:c3p0:0.9.5.2'
+    runtime 'com.mchange:mchange-commons-java:0.2.15'
+    runtime 'mysql:mysql-connector-java:8.0.9-rc'
+}
+
+configurations.all {
+    transitive = false
+}
+
+jar {
+    baseName 'l2j-tools'
+
+    exclude('config/**')
+}
+
+task zip(type: Zip, group: "Archive", description: "Zip Gameserver") {
+    into('lib') {
+        from([jar, configurations.runtime])
+    }
+
+    from('bin')
+    from(sourceSets.main.resources)
+
+    destinationDir project.buildDir
+}
+
+build.finalizedBy(zip)

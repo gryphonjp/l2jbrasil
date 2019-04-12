@@ -1,0 +1,53 @@
+plugins {
+    id "java"
+    id "distribution"
+    id "idea"
+    id "eclipse"
+}
+
+version '1.3.0'
+
+defaultTasks('clean', 'build')
+
+ext.moduleName = 'com.l2jbr'
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+
+    sourceCompatibility = JavaVersion.VERSION_1_9
+}
+
+subprojects {
+    afterEvaluate {
+        compileJava {
+            inputs.property("moduleName", moduleName)
+            doFirst {
+                options.compilerArgs = [
+                        '--module-path', classpath.asPath,
+                ]
+                classpath = files()
+            }
+        }
+    }
+}
+
+
+task zip(type: Zip, group: "Archive", description: "Archives sources in a zip file") {
+    subprojects.each { dependsOn("${it.name}:build") }
+
+    from (project(':Gameserver').buildDir)
+    from (project(':Loginserver').buildDir)
+    from (project(':Datapack').buildDir)
+    from (project(':Tools').buildDir)
+
+    include('*.zip')
+}
+
+
+build.finalizedBy(zip)
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.6'
+}

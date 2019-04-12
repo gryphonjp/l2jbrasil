@@ -1,0 +1,22 @@
+plugins {
+    id "base"
+    id "idea"
+    id "eclipse"
+}
+
+version '1.3.0'
+
+task zip(type: Zip) {
+    from('data') {
+        into('Game/data')
+    }
+
+    into('database') {
+        from('sql')
+        from('tools')
+    }
+
+    destinationDir project.buildDir
+}
+
+build.finalizedBy(zip)

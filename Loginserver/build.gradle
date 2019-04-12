@@ -1,0 +1,70 @@
+plugins {
+    id "java"
+    id "idea"
+    id "eclipse"
+}
+ext.moduleName = 'com.l2jbr.loginserver'
+
+version '1.3.0'
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/com.l2jbr.loginserver']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+}
+
+configurations.all {
+    transitive = false
+}
+
+dependencies {
+    compile project(':Commons')
+    compile project(':Mmocore')
+
+    compile 'org.slf4j:slf4j-api:1.8.0-beta2'
+
+    runtime 'org.apache.logging.log4j:log4j-core:2.11.0'
+    runtime 'org.apache.logging.log4j:log4j-api:2.11.0'
+    runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.11.0'
+    runtime 'com.mchange:c3p0:0.9.5.2'
+    runtime 'com.mchange:mchange-commons-java:0.2.15'
+    runtime 'mysql:mysql-connector-java:8.0.9-rc'
+
+
+}
+
+
+def generalManifest = manifest {
+    attributes('Built-By': System.getProperty('user.name'),
+            'Built-Date': new Date().format("yyyy-MM-dd HH:mm:ss"))
+}
+
+jar {
+    baseName 'l2j-loginserver'
+
+    exclude('config/**')
+    exclude('*.cfg')
+
+    manifest {
+        from(generalManifest)
+        attributes('Main-Class': 'com.l2jbr.loginserver.L2LoginServer')
+    }
+}
+
+task zip(type: Zip, group: "Archive", description: "Zip Loginserver") {
+    into('lib') {
+        from([jar, configurations.runtime])
+    }
+
+    from('bin')
+    from(sourceSets.main.resources)
+
+    destinationDir project.buildDir
+}
+
+build.finalizedBy(zip)
